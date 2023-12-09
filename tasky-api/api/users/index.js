@@ -1,4 +1,5 @@
 import express from 'express';
+import asyncHandler from 'express-async-handler';
 import User from './userModel';
 
 const router = express.Router();
@@ -8,8 +9,11 @@ router.get('/', async (req, res) => {
     res.status(200).json(users);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
     if(req.query.action === 'register') {
+        if(!req.body.username || !req.body.password) {
+            return res.status(400).json({code: 400, msg: 'Please enter a username and a password'});
+        }
         await User(req.body).save();
         res.status(201).json({
             code: 201,
@@ -23,7 +27,7 @@ router.post('/', async (req, res) => {
             return res.status(200).json({code: 200, msg: "Authentication successful", token: 'TEMPORARY_TOKEN'});
         }
     }
-});
+}));
 
 router.put('/:id', async (req, res) => {
     if(req.body._id) delete req.body._id;
